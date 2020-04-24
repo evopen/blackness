@@ -1,0 +1,34 @@
+﻿add_executable (blackness "blackness.cpp" "movie_writer.cpp" "metric/schwarzschild.cpp" "metric/flat.cpp" "image_generator.cpp")
+target_precompile_headers(blackness PRIVATE pch.h)
+target_include_directories(blackness PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+find_package(cxxopts CONFIG REQUIRED)
+target_link_libraries(blackness PRIVATE cxxopts::cxxopts)
+
+find_package(glm CONFIG REQUIRED)
+target_link_libraries(blackness PRIVATE glm)
+
+find_package(unofficial-cairo CONFIG REQUIRED)
+target_link_libraries(blackness PRIVATE unofficial::cairo::cairo unofficial::cairo::cairo-gobject)
+
+find_package(GSL REQUIRED)
+target_link_libraries(blackness PRIVATE GSL::gsl GSL::gslcblas)
+
+find_library(AVDEVICE_LIBRARY avdevice)
+find_library(AVFILTER_LIBRARY avfilter)
+find_library(SWSCALE_LIBRARY swscale)
+find_library(AVFORMAT_LIBRARY avformat)
+find_library(AVCODEC_LIBRARY avcodec)
+find_library(SWRESAMPLE_LIBRARY swresample)
+find_library(AVRESAMPLE_LIBRARY avresample)
+find_library(AVUTIL_LIBRARY avutil)
+target_link_libraries(blackness PRIVATE
+    ${AVDEVICE_LIBRARY} 
+    ${AVFILTER_LIBRARY}
+    ${SWSCALE_LIBRARY} 
+    ${AVFORMAT_LIBRARY} 
+    ${AVCODEC_LIBRARY} 
+    ${SWRESAMPLE_LIBRARY}
+    ${AVRESAMPLE_LIBRARY} 
+    ${AVUTIL_LIBRARY}
+)

@@ -1,0 +1,24 @@
+# Visual Studio
+out/
+.vs/
+build/
+
+# Code Analysis Reports
+clang_tidy.txt
+cppcheck.xml
+gtest.xml
+gcov.xml
+
+# Visual Studio Test Reports
+TestResults/
+
+*.mp4
+
+*.spv
+*.png
+
+# clion
+cmake-build-debug
+.idea
+
+!resources/**
