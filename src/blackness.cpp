@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "camera.h"
+#include "gui/main_window.h"
 #include "image.h"
 #include "image_generator.h"
 
@@ -68,7 +69,7 @@ void Parse(int argc, char* argv[], Arguments& args)
 
         auto result = options.parse(argc, argv);
 
-        if (result.count("help") != 0u)
+        if (result.count("help") != 0)
         {
             std::cout << options.help({"", "Required", "Image", "Video", "Disk"}) << std::endl;
             exit(0);
@@ -175,6 +176,15 @@ int main(int argc, char* argv[])
 {
     try
     {
+        if (argc == 1)
+        {
+            QApplication app(argc, argv);
+            QGuiApplication::setApplicationDisplayName(MainWindow::tr("Blackness"));
+            MainWindow main_window;
+
+            main_window.show();
+            return app.exec();
+        }
         Arguments args;
         Parse(argc, argv, args);
 

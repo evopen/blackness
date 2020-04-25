@@ -12,6 +12,20 @@
 #include <omp.h>
 #include <opencv2/opencv.hpp>
 
+#include <QApplication>
+#include <QCheckBox>
+#include <QGraphicsView>
+#include <QGuiApplication>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QFileDialog>
+#include <QGraphicsPixmapItem>
+#include <QPixmap>
+
 #include <array>
 #include <chrono>
 #include <cmath>

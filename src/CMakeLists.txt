@@ -1,4 +1,21 @@
-﻿add_executable (blackness "blackness.cpp" "movie_writer.cpp" "metric/schwarzschild.cpp" "metric/flat.cpp" "image_generator.cpp")
+﻿set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+
+add_executable (blackness 
+    "blackness.cpp" 
+    "movie_writer.cpp" 
+    "metric/schwarzschild.cpp" 
+    "metric/flat.cpp" 
+    "image_generator.cpp" 
+    "gui/main_window.cpp"
+    "gui/main_window.ui"
+)
+
+
 target_precompile_headers(blackness PRIVATE pch.h)
 target_include_directories(blackness PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
@@ -13,6 +30,9 @@ target_link_libraries(blackness PRIVATE unofficial::cairo::cairo unofficial::cai
 
 find_package(GSL REQUIRED)
 target_link_libraries(blackness PRIVATE GSL::gsl GSL::gslcblas)
+
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+target_link_libraries(blackness PRIVATE Qt5::Widgets)
 
 find_library(AVDEVICE_LIBRARY avdevice)
 find_library(AVFILTER_LIBRARY avfilter)

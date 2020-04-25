@@ -61,6 +61,7 @@ public:
     void SetThreads(uint32_t threads) { this->threads_ = threads; }
     void Generate();
     void SaveImage(std::filesystem::path filename);
+    Image* GetImage() { return color_buffer_.get(); }
 
 private:
     std::shared_ptr<Blackhole> blackhole_;
@@ -73,8 +74,8 @@ private:
     bool bloom_;
     uint32_t threads_ = 1;
     std::mt19937 rng_;
-    std::unique_ptr<Image> color_buffer_;
-    std::unique_ptr<Image> light_buffer_;
+    std::shared_ptr<Image> color_buffer_;
+    std::shared_ptr<Image> light_buffer_;
 
     void FlatWorker(int idx);
     void SchwarzschildWorker(int idx);

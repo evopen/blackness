@@ -83,6 +83,7 @@ public:
 
     inline int Height() const { return height_; }
     inline int Width() const { return width_; }
+    inline float* data() { return img_.get(); }
 
 private:
     std::shared_ptr<float[]> img_;
