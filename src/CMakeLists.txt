@@ -10,6 +10,7 @@ add_executable (blackness
     "movie_writer.cpp" 
     "metric/schwarzschild.cpp" 
     "metric/flat.cpp" 
+    "metric/common.cpp"
     "image_generator.cpp" 
     "gui/main_window.cpp"
     "gui/main_window.ui"
@@ -17,6 +18,7 @@ add_executable (blackness
 
 
 target_precompile_headers(blackness PRIVATE pch.h)
+set_target_properties(blackness PROPERTIES UNITY_BUILD ON)
 target_include_directories(blackness PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(cxxopts CONFIG REQUIRED)
@@ -33,6 +35,9 @@ target_link_libraries(blackness PRIVATE GSL::gsl GSL::gslcblas)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 target_link_libraries(blackness PRIVATE Qt5::Widgets)
+
+find_package(OpenCV CONFIG REQUIRED)
+target_link_libraries(blackness PRIVATE ${OpenCV_LIBS})
 
 find_library(AVDEVICE_LIBRARY avdevice)
 find_library(AVFILTER_LIBRARY avfilter)

@@ -39,7 +39,7 @@ void ImageGenerator::SchwarzschildWorker(int idx)
         for (int col = 0; col < width_; ++col)
         {
             glm::dvec3 tex_coord = camera_.GetTexCoord(row, col, width_, height_);
-            glm::dvec3 color(0, 0, 0);
+            cv::Vec3b color(0, 0, 0);
             bool hit = false;
 
             for (int sample = 0; sample < samples_; sample++)
@@ -52,7 +52,7 @@ void ImageGenerator::SchwarzschildWorker(int idx)
                 color += metric::schwarzschild::Trace(
                     camera_.Position(), sample_coord, *blackhole_, skybox_, workspace, &hit);
             }
-            color_buffer_->Set(col, row, glm::vec4(color, 1.0));
+            color_buffer_->at<cv::Vec3b>(col, row) = color;
         }
     }
 }
@@ -68,8 +68,7 @@ void ImageGenerator::FlatWorker(int idx)
         for (int col = 0; col < width_; ++col)
         {
             glm::dvec3 tex_coord = camera_.GetTexCoord(row, col, width_, height_);
-            glm::dvec3 color(0, 0, 0);
-            bool hit = false;
+            cv::Vec3b color(0, 0, 0);
 
             for (int sample = 0; sample < samples_; sample++)
             {
@@ -80,12 +79,16 @@ void ImageGenerator::FlatWorker(int idx)
                     sample_coord = tex_coord;
                 color += metric::flat::Trace(camera_.Position(), sample_coord, skybox_) / double(samples_);
             }
-            color_buffer_->Set(col, row, glm::vec4(color, 1.0));
+            if (!color_buffer_)
+            {
+                color_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
+            }
+            color_buffer_->at<cv::Vec3b>(col, row) = color;
         }
     }
 }
 
-void ImageGenerator::SaveImage(std::filesystem::path filename)
+void ImageGenerator::SaveImageToDisk(std::filesystem::path filename)
 {
-    color_buffer_->Save(filename);
+    cv::imwrite(filename.string(), *color_buffer_);
 }

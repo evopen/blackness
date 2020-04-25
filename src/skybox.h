@@ -1,13 +1,14 @@
 #pragma once
 
-#include "image.h"
+#include "pch.h"
+
 
 struct Skybox
 {
-    Image front;
-    Image back;
-    Image top;
-    Image bottom;
-    Image left;
-    Image right;
+    std::shared_ptr<cv::Mat> front;
+    std::shared_ptr<cv::Mat> back;
+    std::shared_ptr<cv::Mat> top;
+    std::shared_ptr<cv::Mat> bottom;
+    std::shared_ptr<cv::Mat> left;
+    std::shared_ptr<cv::Mat> right;
 };

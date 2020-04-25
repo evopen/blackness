@@ -2,13 +2,8 @@
 
 #include "camera.h"
 #include "gui/main_window.h"
-#include "image.h"
 #include "image_generator.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image.h>
-#include <stb_image_write.h>
 
 struct Arguments
 {
@@ -202,7 +197,7 @@ int main(int argc, char* argv[])
         }
 
         img_generator.Generate();
-        img_generator.SaveImage(args.output_path);
+        img_generator.SaveImageToDisk(args.output_path);
     }
     catch (const std::exception& e)
     {

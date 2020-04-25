@@ -30,6 +30,6 @@ private:
 
 private:
     Ui::MainWindow* ui_;
-    std::shared_ptr<uint8_t[]> img_;
+    std::shared_ptr<const cv::Mat> img_;
     QGraphicsScene* scene_;
 };

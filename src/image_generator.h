@@ -4,7 +4,6 @@
 #include "blackhole.h"
 #include "camera.h"
 #include "fs.h"
-#include "image.h"
 #include "skybox.h"
 
 
@@ -16,8 +15,6 @@ public:
         : samples_(samples), width_(width), height_(height), camera_(cam)
     {
         LoadSkybox(skybox_folder);
-        color_buffer_.reset(new Image(width_, height_));
-        light_buffer_.reset(new Image(width_, height_));
     }
 
     void SetBlackhole(const Blackhole& bh) { blackhole_.reset(new Blackhole(bh)); }
@@ -33,23 +30,25 @@ public:
                 std::string filename = file.path().stem().string();
 
                 if (filename == "front")
-                    skybox_.front.LoadImage(file.path());
+                    skybox_.front.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename == "back")
-                    skybox_.back.LoadImage(file.path());
+                    skybox_.back.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename == "top")
-                    skybox_.top.LoadImage(file.path());
+                    skybox_.top.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename == "bottom")
-                    skybox_.bottom.LoadImage(file.path());
+                    skybox_.bottom.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename == "left")
-                    skybox_.left.LoadImage(file.path());
+                    skybox_.left.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename == "right")
-                    skybox_.right.LoadImage(file.path());
+                    skybox_.right.reset(new cv::Mat(cv::imread(file.path().string())));
+                else
+                    throw std::runtime_error("error loading image");
             }
         }
         else if (file_count == 1)
         {
             auto iter = std::filesystem::directory_iterator(skybox_folder);
-            skybox_.front.LoadImage(iter->path());
+            skybox_.front.reset(new cv::Mat(cv::imread(iter->path().string())));
             skybox_.left = skybox_.right = skybox_.bottom = skybox_.top = skybox_.back = skybox_.front;
         }
         else
@@ -60,8 +59,8 @@ public:
 
     void SetThreads(uint32_t threads) { this->threads_ = threads; }
     void Generate();
-    void SaveImage(std::filesystem::path filename);
-    Image* GetImage() { return color_buffer_.get(); }
+    void SaveImageToDisk(std::filesystem::path filename);
+    std::shared_ptr<const cv::Mat> ResultImage() { return color_buffer_; }
 
 private:
     std::shared_ptr<Blackhole> blackhole_;
@@ -74,8 +73,8 @@ private:
     bool bloom_;
     uint32_t threads_ = 1;
     std::mt19937 rng_;
-    std::shared_ptr<Image> color_buffer_;
-    std::shared_ptr<Image> light_buffer_;
+    std::shared_ptr<cv::Mat> color_buffer_;
+    std::shared_ptr<cv::Mat> light_buffer_;
 
     void FlatWorker(int idx);
     void SchwarzschildWorker(int idx);

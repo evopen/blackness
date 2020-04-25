@@ -6,5 +6,5 @@
 
 namespace metric::flat
 {
-    glm::dvec3 Trace(glm::dvec3 position, glm::dvec3 direction, const Skybox& skybox);
+    cv::Vec3b Trace(glm::dvec3 position, glm::dvec3 direction, const Skybox& skybox);
 }

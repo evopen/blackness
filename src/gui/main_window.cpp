@@ -81,20 +81,22 @@ void MainWindow::Render()
     ImageGenerator img_generator(skybox_folder_path, camera, std::pow(2, ui_->samples_box->currentIndex()),
         ui_->width_lineedit->text().toDouble(), ui_->height_lineedit->text().toDouble());
     img_generator.Generate();
-    Image* image = img_generator.GetImage();
-    img_.reset(new uint8_t[image->Height() * image->Width() * 4]);
-    for (int row = 0; row < image->Height(); ++row)
+    img_ = img_generator.ResultImage();
+
+    int format;
+    switch (img_->type())
     {
-        for (int col = 0; col < image->Width(); ++col)
-        {
-            glm::dvec4 hdr_color                         = image->Get(col, row);
-            img_[row * image->Width() * 4 + col * 4 + 0] = std::clamp(hdr_color.r * 255, 0.0, 255.0);
-            img_[row * image->Width() * 4 + col * 4 + 1] = std::clamp(hdr_color.g * 255, 0.0, 255.0);
-            img_[row * image->Width() * 4 + col * 4 + 2] = std::clamp(hdr_color.b * 255, 0.0, 255.0);
-            img_[row * image->Width() * 4 + col * 4 + 3] = 255;
-        }
+    case CV_8UC3:
+        format = QImage::Format_RGB888;
+        break;
+    case CV_8UC4:
+        format = QImage::Format_RGBX8888;
+        break;
+    default:
+        throw std::runtime_error("unknown image type");
     }
-    QImage qimage(img_.get(), image->Width(), image->Height(), QImage::Format_RGBA8888);
+
+    QImage qimage(img_->data, img_->size().width, img_->size().height, QImage::Format_RGB888);
     QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(qimage));
 
     scene_->addItem(item);
