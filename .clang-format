@@ -141,8 +141,10 @@ IncludeCategories:
     Priority:   2
   - Regex:      '^<.*\.hpp>'
     Priority:   2
-  - Regex:      '^<.*'
+  - Regex:      '^<Q.*'
     Priority:   3
+  - Regex:      '^<.*'
+    Priority:   4
 
 # IncludeIsMainRegex: '(Test)?$'
 # IndentCaseLabels: false
