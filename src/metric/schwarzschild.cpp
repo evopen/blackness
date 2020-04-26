@@ -97,10 +97,12 @@ namespace metric::schwarzschild
         double integrate_end     = 2000;
         if (b < std::sqrt(27))
         {
-            // Debug
-            // return glm::dvec3(1, 1, 1);
+            double dphi;
+            if (r0 < bh.DiskOuter())
+                dphi = 0;
+            else
+                dphi = std::fmod(Integrate(r0, bh.DiskOuter(), b, w), 2 * M_PI);
 
-            double dphi                 = std::fmod(Integrate(r0, bh.DiskOuter(), b, w), 2 * M_PI);  /// here
             glm::dvec3 photon_pos_start = glm::rotate(position, -dphi, rotation_axis);
             double dphi_in_disk         = Integrate(bh.DiskOuter(), bh.DiskInner(), b, w);
             dphi                        = std::fmod(dphi + dphi_in_disk, M_PI * 2);
@@ -128,7 +130,11 @@ namespace metric::schwarzschild
             }
             else
             {
-                double dphi                 = std::fmod(Integrate(r0, bh.DiskOuter(), b, w), 2 * M_PI);
+                double dphi;
+                if (r0 < bh.DiskOuter())
+                    dphi = 0;
+                else
+                    dphi = std::fmod(Integrate(r0, bh.DiskOuter(), b, w), 2 * M_PI);
                 glm::dvec3 photon_pos_start = glm::rotate(position, -dphi, rotation_axis);
 
                 if (r3 < bh.DiskInner())  // TODO:later
