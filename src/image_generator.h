@@ -42,17 +42,17 @@ public:
             {
                 std::string filename = file.path().stem().string();
 
-                if (filename == "front")
+                if (filename.find("front") != std::string::npos)
                     skybox_.front.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename == "back")
+                else if (filename.find("back") != std::string::npos)
                     skybox_.back.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename == "top")
+                else if (filename.find("top") != std::string::npos)
                     skybox_.top.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename == "bottom")
+                else if (filename.find("bottom") != std::string::npos)
                     skybox_.bottom.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename == "left")
+                else if (filename.find("left") != std::string::npos)
                     skybox_.left.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename == "right")
+                else if (filename.find("right") != std::string::npos)
                     skybox_.right.reset(new cv::Mat(cv::imread(file.path().string())));
                 else
                     throw std::runtime_error("error loading image");
