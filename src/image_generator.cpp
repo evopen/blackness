@@ -51,7 +51,7 @@ void ImageGenerator::SchwarzschildWorker(int idx)
                 return;
             }
             glm::dvec3 tex_coord = camera_->GetTexCoord(row, col, width_, height_);
-            cv::Vec3b color(0, 0, 0);
+            cv::Vec3f color(0, 0, 0);
             bool hit = false;
 
             for (int sample = 0; sample < samples_; sample++)
@@ -62,7 +62,7 @@ void ImageGenerator::SchwarzschildWorker(int idx)
                 else
                     sample_coord = tex_coord;
                 color += metric::schwarzschild::Trace(
-                    camera_->Position(), sample_coord, *blackhole_, skybox_, workspace, &hit);
+                    camera_->Position(), sample_coord, *blackhole_, skybox_, workspace, &hit) / double(samples_);
             }
             color_buffer_->at<cv::Vec3b>(row, col) = color;
         }
@@ -82,7 +82,7 @@ void ImageGenerator::FlatWorker(int idx)
                 return;
             }
             glm::dvec3 tex_coord = camera_->GetTexCoord(row, col, width_, height_);
-            cv::Vec3b color(0, 0, 0);
+            cv::Vec3d color(0, 0, 0);
 
             for (int sample = 0; sample < samples_; sample++)
             {
