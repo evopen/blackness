@@ -10,14 +10,27 @@
 class ImageGenerator
 {
 public:
+    explicit ImageGenerator() {}
     explicit ImageGenerator(
         std::filesystem::path skybox_folder, Camera cam, uint32_t samples, uint32_t width, uint32_t height)
-        : samples_(samples), width_(width), height_(height), camera_(cam)
+        : samples_(samples), width_(width), height_(height)
     {
+        camera_.reset(new Camera(cam));
         LoadSkybox(skybox_folder);
+
+        color_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
     }
 
     void SetBlackhole(const Blackhole& bh) { blackhole_.reset(new Blackhole(bh)); }
+    void RemoveBlackhole() { blackhole_.reset(); }
+    void RemoveDisk()
+    {
+        if (!blackhole_)
+        {
+            blackhole_->SetDiskInner(1);
+            blackhole_->SetDiskOuter(1);
+        }
+    }
 
     void LoadSkybox(std::filesystem::path& skybox_folder)
     {
@@ -58,13 +71,24 @@ public:
     }
 
     void SetThreads(uint32_t threads) { this->threads_ = threads; }
+    void SetSamples(uint32_t samples) { this->samples_ = samples; }
+    void SetCamera(const Camera& cam) { this->camera_.reset(new Camera(cam)); }
+    void SetSize(uint32_t width, uint32_t height)
+    {
+        this->width_  = width;
+        this->height_ = height;
+        color_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
+    }
     void Generate();
     void SaveImageToDisk(std::filesystem::path filename);
+    void Abort();
+    bool IsRendering() { return rendering_; }
+
     std::shared_ptr<const cv::Mat> ResultImage() { return color_buffer_; }
 
 private:
     std::shared_ptr<Blackhole> blackhole_;
-    Camera camera_;
+    std::shared_ptr<Camera> camera_;
     Skybox skybox_;
     uint32_t samples_;
     uint32_t width_;
@@ -75,6 +99,9 @@ private:
     std::mt19937 rng_;
     std::shared_ptr<cv::Mat> color_buffer_;
     std::shared_ptr<cv::Mat> light_buffer_;
+    bool rendering_ = false;
+    bool abort_     = false;
+    std::vector<std::thread> thread_pool_;
 
     void FlatWorker(int idx);
     void SchwarzschildWorker(int idx);

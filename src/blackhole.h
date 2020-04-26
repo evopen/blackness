@@ -26,6 +26,9 @@ public:
         }
     }
 
+    void SetDiskInner(double radius) { disk_inner_ = radius; }
+    void SetDiskOuter(double radius) { disk_outer_ = radius; }
+
     double DiskOuter()
     {
         if (has_disk_)

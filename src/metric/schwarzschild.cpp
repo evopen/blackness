@@ -82,7 +82,7 @@ namespace metric::schwarzschild
 
         int sample_index = dr / (bh.DiskOuter() - bh.DiskInner()) * (bh.DiskTexture().size().height - 1);
 
-        return bh.DiskTexture().at<cv::Vec3b>(0, sample_index);
+        return bh.DiskTexture().at<cv::Vec3b>(sample_index);
     }
 
     cv::Vec3b Trace(glm::dvec3 position, glm::dvec3 direction, const Blackhole& bh, const Skybox& skybox,

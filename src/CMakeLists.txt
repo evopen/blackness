@@ -1,4 +1,6 @@
-﻿set(CMAKE_AUTOUIC ON)
+﻿find_package(Qt5 COMPONENTS Widgets REQUIRED)
+qt5_wrap_ui(SOURCES "gui/main_window.ui")
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -33,7 +35,7 @@ target_link_libraries(blackness PRIVATE unofficial::cairo::cairo unofficial::cai
 find_package(GSL REQUIRED)
 target_link_libraries(blackness PRIVATE GSL::gsl GSL::gslcblas)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
 target_link_libraries(blackness PRIVATE Qt5::Widgets)
 
 find_package(OpenCV CONFIG REQUIRED)

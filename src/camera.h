@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-    explicit Camera(glm::dvec3 position, glm::dvec3 look_at, glm::dvec3 world_up = glm::dvec3(0, 1, 0), double fov = 90)
+    explicit Camera(glm::dvec3 position, glm::dvec3 look_at, glm::dvec3 world_up = glm::dvec3(0, 1, 0), double fov = 60)
         : position_(position), world_up_(world_up)
     {
         LookAt(look_at);

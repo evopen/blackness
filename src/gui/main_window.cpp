@@ -7,17 +7,9 @@
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
+    img_generator_.reset(new ImageGenerator());
     ui_->setupUi(this);
-    ui_->cam_pox_x_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->cam_pox_y_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->cam_pox_z_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->cam_lookat_x_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->cam_lookat_y_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->cam_lookat_z_lineedit->setValidator(new QDoubleValidator(1, 100, 2, this));
-    ui_->width_lineedit->setValidator(new QIntValidator(1, 4096, this));
-    ui_->width_lineedit->setValidator(new QIntValidator(1, 4096, this));
-    scene_ = new QGraphicsScene();
-    ui_->graphicsView->setScene(scene_);
+    SetupUI();
     SetupAction();
 }
 
@@ -42,11 +34,13 @@ void MainWindow::AccretionDiskCheckboxUpdate()
     {
         ui_->disk_browser_lineedit->setEnabled(false);
         ui_->disk_browser_button->setEnabled(false);
+        ui_->disk_radius_widget->setEnabled(false);
     }
     else
     {
         ui_->disk_browser_lineedit->setEnabled(true);
         ui_->disk_browser_button->setEnabled(true);
+        ui_->disk_radius_widget->setEnabled(true);
     }
 }
 void MainWindow::SelectSkyboxFolder()
@@ -70,50 +64,141 @@ void MainWindow::SelectDiskTexture()
     }
 }
 
-void MainWindow::Render()
+
+void MainWindow::RenderOrAbort()
 {
+    ui_->render_button->setText("Abort");
+    auto start_time = std::chrono::high_resolution_clock::now();
+    if (img_generator_->IsRendering())
+    {
+        img_generator_->Abort();
+        ui_->render_button->setText("Render");
+        return;
+    }
+    uint32_t width  = ui_->width_lineedit->text().toInt();
+    uint32_t height = ui_->height_lineedit->text().toInt();
+    int samples     = ui_->samples_box->currentText().toInt();
     std::filesystem::path skybox_folder_path(ui_->skybox_path_lineedit->text().toStdString());
-    glm::dvec3 camera_pos(ui_->cam_pox_x_lineedit->text().toDouble(), ui_->cam_pox_x_lineedit->text().toDouble(),
-        ui_->cam_pox_x_lineedit->text().toDouble());
+    glm::dvec3 camera_pos(ui_->cam_pox_x_lineedit->text().toDouble(), ui_->cam_pox_y_lineedit->text().toDouble(),
+        ui_->cam_pox_z_lineedit->text().toDouble());
     glm::dvec3 camera_lookat(ui_->cam_lookat_x_lineedit->text().toDouble(),
         ui_->cam_lookat_y_lineedit->text().toDouble(), ui_->cam_lookat_z_lineedit->text().toDouble());
     Camera camera(camera_pos, camera_lookat);
-    ImageGenerator img_generator(skybox_folder_path, camera, std::pow(2, ui_->samples_box->currentIndex()),
-        ui_->width_lineedit->text().toDouble(), ui_->height_lineedit->text().toDouble());
-    img_generator.Generate();
-    img_ = img_generator.ResultImage();
 
-    int format;
-    switch (img_->type())
+    img_generator_->LoadSkybox(skybox_folder_path);
+    img_generator_->SetCamera(camera);
+    img_generator_->SetSamples(samples);
+    img_generator_->SetSize(width, height);
+    img_ = img_generator_->ResultImage();
+
+
+    std::shared_ptr<Blackhole> blackhole;
+    if (ui_->blackhole_checkbox->isChecked())
     {
-    case CV_8UC3:
-        format = QImage::Format_RGB888;
-        break;
-    case CV_8UC4:
-        format = QImage::Format_RGBX8888;
-        break;
-    default:
-        throw std::runtime_error("unknown image type");
+        double disk_inner, disk_outer;
+        if (ui_->accretion_disk_checkbox->isChecked())
+        {
+            disk_inner = ui_->disk_inner_lineedit->text().toDouble();
+            disk_outer = ui_->disk_outer_lineedit->text().toDouble();
+        }
+        else
+        {
+            disk_inner = 1;
+            disk_outer = 1;
+        }
+        std::filesystem::path disk_texture_path = ui_->disk_browser_lineedit->text().toStdString();
+        blackhole = std::make_shared<Blackhole>(glm::dvec3(0, 0, 0), disk_inner, disk_outer, disk_texture_path);
+        img_generator_->SetBlackhole(*blackhole);
+    }
+    else
+    {
+        img_generator_->RemoveBlackhole();
     }
 
-    QImage qimage(img_->data, img_->size().width, img_->size().height, QImage::Format_RGB888);
-    QGraphicsPixmapItem *item = new QGraphicsPixmapItem(QPixmap::fromImage(qimage));
+    img_generator_->SetThreads(ui_->threads_box->currentText().toInt());
 
-    scene_->addItem(item);
-    scene_->update();
+    QImage::Format format = QImage::Format_RGB888;
 
+    std::atomic<bool> finished = false;
+
+    auto generate_thread = std::thread([&] {
+        img_generator_->Generate();
+        finished = true;
+    });
+
+    scene_->setSceneRect(0, 0, img_->size().width, img_->size().height);
+    while (!finished)
+    {
+        std::this_thread::sleep_for(0.1s);
+        pixmap_item_->setPixmap(
+            QPixmap::fromImage(QImage(img_->data, img_->size().width, img_->size().height, format).rgbSwapped()));
+        ui_->graphicsView->update();
+        scene_->update();
+        ui_->graphicsView->fitInView(pixmap_item_, Qt::KeepAspectRatio);
+
+        qApp->processEvents();
+    }
+    generate_thread.join();
+
+    pixmap_item_->setPixmap(
+        QPixmap::fromImage(QImage(img_->data, img_->size().width, img_->size().height, format).rgbSwapped()));
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
+    statusBar()->showMessage("Render Time: " + QString::number(duration) + " seconds");
+    ui_->render_button->setText("Render");
 }
 
 
 void MainWindow::SetupUI()
 {
+    QDoubleValidator* pos_validator = new QDoubleValidator(1, 4096, 2, this);
+    pos_validator->setNotation(QDoubleValidator::StandardNotation);
+    ui_->cam_pox_x_lineedit->setValidator(pos_validator);
+    ui_->cam_pox_y_lineedit->setValidator(pos_validator);
+    ui_->cam_pox_z_lineedit->setValidator(pos_validator);
+    ui_->cam_lookat_x_lineedit->setValidator(pos_validator);
+    ui_->cam_lookat_y_lineedit->setValidator(pos_validator);
+    ui_->cam_lookat_z_lineedit->setValidator(pos_validator);
+    ui_->width_lineedit->setValidator(new QIntValidator(1, 4096, this));
+    ui_->height_lineedit->setValidator(new QIntValidator(1, 4096, this));
+    scene_       = new QGraphicsScene();
+    pixmap_item_ = new QGraphicsPixmapItem();
+    scene_->addItem(pixmap_item_);
+    ui_->graphicsView->setScene(scene_);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    QMainWindow::resizeEvent(event);
+    // Your code here.
+    ui_->graphicsView->fitInView(pixmap_item_, Qt::KeepAspectRatio);
+}
+
+void MainWindow::WidthUpdate()
+{
+    const QValidator* validator = ui_->width_lineedit->validator();
+
+    int pos    = 0;
+    auto text  = ui_->width_lineedit->text();
+    auto state = validator->validate(text, pos);
+    if (state != QValidator::Acceptable)
+    {
+        ui_->width_lineedit->setText(ui_->height_lineedit->text());
+        ui_->error_label->setText("Resolution ranges from 1 to 4096");
+    }
+    else
+    {
+        ui_->height_lineedit->setText(ui_->width_lineedit->text());
+    }
 }
 
 void MainWindow::SetupAction()
 {
     connect(ui_->skybox_browser_button, SIGNAL(clicked()), SLOT(SelectSkyboxFolder()));
     connect(ui_->disk_browser_button, SIGNAL(clicked()), SLOT(SelectDiskTexture()));
-    connect(ui_->render_button, SIGNAL(clicked()), SLOT(Render()));
+    connect(ui_->render_button, SIGNAL(clicked()), SLOT(RenderOrAbort()));
     connect(ui_->blackhole_checkbox, SIGNAL(stateChanged(int)), SLOT(BlackholeCheckboxUpdate()));
     connect(ui_->accretion_disk_checkbox, SIGNAL(stateChanged(int)), SLOT(AccretionDiskCheckboxUpdate()));
+    connect(ui_->width_lineedit, SIGNAL(editingFinished()), SLOT(WidthUpdate()));
 }

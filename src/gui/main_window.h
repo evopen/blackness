@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include "image_generator.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -22,14 +23,18 @@ private slots:
     void SelectDiskTexture();
     void BlackholeCheckboxUpdate();
     void AccretionDiskCheckboxUpdate();
-    void Render();
+    void RenderOrAbort();
+    void WidthUpdate();
 
 private:
     void SetupUI();
     void SetupAction();
+    void MainWindow::resizeEvent(QResizeEvent* event);
 
 private:
     Ui::MainWindow* ui_;
     std::shared_ptr<const cv::Mat> img_;
     QGraphicsScene* scene_;
+    QGraphicsPixmapItem* pixmap_item_;
+    std::unique_ptr<ImageGenerator> img_generator_;
 };

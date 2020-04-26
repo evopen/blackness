@@ -6,27 +6,37 @@
 
 void ImageGenerator::Generate()
 {
-    std::vector<std::thread> threads;
+    abort_     = false;
+    rendering_ = true;
     if (!blackhole_)
     {
         for (int i = 0; i < threads_; ++i)
         {
-            threads.emplace_back(std::thread(&ImageGenerator::FlatWorker, this, i));
+            thread_pool_.emplace_back(std::thread(&ImageGenerator::FlatWorker, this, i));
         }
     }
     else
     {
         for (int i = 0; i < threads_; ++i)
         {
-            threads.emplace_back(std::thread(&ImageGenerator::SchwarzschildWorker, this, i));
+            thread_pool_.emplace_back(std::thread(&ImageGenerator::SchwarzschildWorker, this, i));
         }
     }
     for (int i = 0; i < threads_; ++i)
     {
-        threads[i].join();
+        thread_pool_[i].join();
     }
+    thread_pool_.clear();
+    rendering_ = false;
 }
 
+void ImageGenerator::Abort()
+{
+    if (rendering_)
+    {
+        abort_ = true;
+    }
+}
 
 void ImageGenerator::SchwarzschildWorker(int idx)
 {
@@ -34,11 +44,13 @@ void ImageGenerator::SchwarzschildWorker(int idx)
     gsl_integration_workspace* workspace = gsl_integration_workspace_alloc(1000);
     for (int row = idx; row < height_; row += threads_)
     {
-        if (idx == 0)
-            std::cout << double(row) / height_ << "\r";
         for (int col = 0; col < width_; ++col)
         {
-            glm::dvec3 tex_coord = camera_.GetTexCoord(row, col, width_, height_);
+            if (abort_)
+            {
+                return;
+            }
+            glm::dvec3 tex_coord = camera_->GetTexCoord(row, col, width_, height_);
             cv::Vec3b color(0, 0, 0);
             bool hit = false;
 
@@ -50,9 +62,9 @@ void ImageGenerator::SchwarzschildWorker(int idx)
                 else
                     sample_coord = tex_coord;
                 color += metric::schwarzschild::Trace(
-                    camera_.Position(), sample_coord, *blackhole_, skybox_, workspace, &hit);
+                    camera_->Position(), sample_coord, *blackhole_, skybox_, workspace, &hit);
             }
-            color_buffer_->at<cv::Vec3b>(col, row) = color;
+            color_buffer_->at<cv::Vec3b>(row, col) = color;
         }
     }
 }
@@ -63,11 +75,13 @@ void ImageGenerator::FlatWorker(int idx)
     std::uniform_real_distribution<double> uni(-0.001, 0.001);
     for (int row = idx; row < height_; row += threads_)
     {
-        if (idx == 0)
-            std::cout << double(row) / height_ << "\r";
         for (int col = 0; col < width_; ++col)
         {
-            glm::dvec3 tex_coord = camera_.GetTexCoord(row, col, width_, height_);
+            if (abort_)
+            {
+                return;
+            }
+            glm::dvec3 tex_coord = camera_->GetTexCoord(row, col, width_, height_);
             cv::Vec3b color(0, 0, 0);
 
             for (int sample = 0; sample < samples_; sample++)
@@ -77,13 +91,9 @@ void ImageGenerator::FlatWorker(int idx)
                     sample_coord = tex_coord + glm::dvec3(uni(rng_), uni(rng_), uni(rng_));
                 else
                     sample_coord = tex_coord;
-                color += metric::flat::Trace(camera_.Position(), sample_coord, skybox_) / double(samples_);
+                color += metric::flat::Trace(camera_->Position(), sample_coord, skybox_) / double(samples_);
             }
-            if (!color_buffer_)
-            {
-                color_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
-            }
-            color_buffer_->at<cv::Vec3b>(col, row) = color;
+            color_buffer_->at<cv::Vec3b>(row, col) = color;
         }
     }
 }
