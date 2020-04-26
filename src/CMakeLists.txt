@@ -1,4 +1,4 @@
-﻿find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
 qt5_wrap_ui(SOURCES "gui/main_window.ui")
 
 set(CMAKE_AUTOMOC ON)
@@ -17,6 +17,12 @@ add_executable (blackness
     "gui/main_window.cpp"
     "gui/main_window.ui"
 )
+
+if(WIN32)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+      set_property(TARGET blackness PROPERTY WIN32_EXECUTABLE true)
+    endif()
+endif(WIN32)
 
 
 target_precompile_headers(blackness PRIVATE pch.h)
