@@ -20,9 +20,8 @@ void VideoGenerator::GenerateAndSave()
     {
         if (abort_)
             return;
-        img_generator_->GetCamera()->SetPosition(positions_[i] + glm::vec3(0.01, 0.01, 0.01));
-        img_generator_->GetCamera()->SetFrontAndUp(
-            fronts_[i] + glm::vec3(0.01, 0.01, 0.01), ups_[i] + glm::vec3(0.01, 0.01, 0.01));
+        img_generator_->GetCamera()->SetPosition(positions_[i]);
+        img_generator_->GetCamera()->SetFrontAndUp(fronts_[i], ups_[i]);
 
         img_generator_->Generate();
 

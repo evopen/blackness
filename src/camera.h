@@ -17,7 +17,7 @@ public:
         fov_ = glm::radians(fov);
     }
 
-    void SetPosition(glm::dvec3 pos) { position_ = pos; }
+    void SetPosition(glm::dvec3 pos) { position_ = pos + glm::dvec3(0.01, 0.01, 0.01); }
 
     // keep front vector invariant
     void SetWorldUp(glm::dvec3 world_up)
@@ -28,7 +28,7 @@ public:
 
     void LookAt(glm::dvec3 point)
     {
-        front_ = glm::normalize(point - position_);
+        front_ = glm::normalize(point - position_ + glm::dvec3(0.01, 0.01, 0.01));
         UpdateVectors();
     }
 
