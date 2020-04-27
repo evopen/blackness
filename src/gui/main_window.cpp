@@ -176,7 +176,7 @@ void MainWindow::RenderOrAbort()
 
 void MainWindow::SetupUI()
 {
-    QDoubleValidator* pos_validator = new QDoubleValidator(1, 4096, 2, this);
+    QDoubleValidator* pos_validator = new QDoubleValidator(-10000, 10000, 2, this);
     pos_validator->setNotation(QDoubleValidator::StandardNotation);
     ui_->cam_pox_x_lineedit->setValidator(pos_validator);
     ui_->cam_pox_y_lineedit->setValidator(pos_validator);
