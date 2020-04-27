@@ -27,6 +27,7 @@ private slots:
     void RenderOrAbort();
     void WidthUpdate();
     void SkyboxPathUpdate();
+    void SaveToDisk();
 
 private:
     void SetupUI();

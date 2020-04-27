@@ -222,6 +222,21 @@ void MainWindow::SkyboxPathUpdate()
     skybox_need_load_ = true;
 }
 
+void MainWindow::SaveToDisk()
+{
+    QString filter = "PNG (*.png)";
+
+    QString directory = QFileDialog::getSaveFileName(this, tr("Save as"), QDir::currentPath(), filter, &filter);
+    if (ui_->bloom_checkbox->isChecked())
+    {
+        cv::imwrite(directory.toStdString(), *(img_generator_->ResultBuffer()));
+    }
+    else
+    {
+        cv::imwrite(directory.toStdString(), *(img_generator_->ColorBuffer()));
+    }
+}
+
 void MainWindow::SetupAction()
 {
     connect(ui_->skybox_browser_button, SIGNAL(clicked()), SLOT(SelectSkyboxFolder()));
@@ -232,4 +247,5 @@ void MainWindow::SetupAction()
     connect(ui_->width_lineedit, SIGNAL(editingFinished()), SLOT(WidthUpdate()));
     connect(ui_->bloom_checkbox, SIGNAL(stateChanged(int)), SLOT(BloomCheckboxUpdate()));
     connect(ui_->skybox_path_lineedit, SIGNAL(editingFinished()), SLOT(SkyboxPathUpdate()));
+    connect(ui_->actionSave, SIGNAL(triggered()), SLOT(SaveToDisk()));
 }
