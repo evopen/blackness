@@ -8,6 +8,8 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui_(new Ui::MainWindow)
 {
     img_generator_.reset(new ImageGenerator());
+    vid_generator_.reset(new VideoGenerator());
+    vid_generator_->SetImageGenerator(img_generator_);
     ui_->setupUi(this);
     SetupUI();
     SetupAction();
@@ -84,17 +86,15 @@ void MainWindow::SelectDiskTexture()
     }
 }
 
-
-void MainWindow::RenderOrAbort()
+void MainWindow::Abort()
 {
-    ui_->render_button->setText("Abort");
-    auto start_time = std::chrono::high_resolution_clock::now();
-    if (img_generator_->IsRendering())
-    {
-        img_generator_->Abort();
-        ui_->render_button->setText("Render");
-        return;
-    }
+    img_generator_->Abort();
+    vid_generator_->Abort();
+    rendering_ = false;
+}
+
+void MainWindow::RenderImage()
+{
     uint32_t width  = ui_->width_lineedit->text().toInt();
     uint32_t height = ui_->height_lineedit->text().toInt();
     int samples     = ui_->samples_box->currentText().toInt();
@@ -166,11 +166,122 @@ void MainWindow::RenderOrAbort()
 
     pixmap_item_->setPixmap(
         QPixmap::fromImage(QImage(img_->data, img_->size().width, img_->size().height, format).rgbSwapped()));
+}
+
+void MainWindow::RenderVideo()
+{
+
+
+    uint32_t width  = ui_->width_lineedit->text().toInt();
+    uint32_t height = ui_->height_lineedit->text().toInt();
+    int samples     = ui_->samples_box->currentText().toInt();
+    std::filesystem::path skybox_folder_path(ui_->skybox_path_lineedit->text().toStdString());
+    Camera camera;
+
+    if (skybox_need_load_)
+    {
+        img_generator_->LoadSkybox(skybox_folder_path);
+        skybox_need_load_ = false;
+    }
+    img_generator_->SetCamera(camera);
+    img_generator_->SetSamples(samples);
+    img_generator_->SetSize(width, height);
+    img_ = img_generator_->ColorBuffer();
+
+
+    std::shared_ptr<Blackhole> blackhole;
+    if (ui_->blackhole_checkbox->isChecked())
+    {
+        double disk_inner, disk_outer;
+        if (ui_->accretion_disk_checkbox->isChecked())
+        {
+            disk_inner = ui_->disk_inner_lineedit->text().toDouble();
+            disk_outer = ui_->disk_outer_lineedit->text().toDouble();
+        }
+        else
+        {
+            disk_inner = 1;
+            disk_outer = 1;
+        }
+        std::filesystem::path disk_texture_path = ui_->disk_browser_lineedit->text().toStdString();
+        blackhole = std::make_shared<Blackhole>(glm::dvec3(0, 0, 0), disk_inner, disk_outer, disk_texture_path);
+        img_generator_->SetBlackhole(*blackhole);
+    }
+    else
+    {
+        img_generator_->RemoveBlackhole();
+    }
+
+    img_generator_->SetThreads(ui_->threads_box->currentText().toInt());
+
+    QImage::Format format = QImage::Format_RGB888;
+
+    std::atomic<bool> finished = false;
+
+    std::filesystem::path position_file_path(ui_->pos_browser_lineedit->text().toStdString());
+    vid_generator_->LoadPositions(position_file_path);
+    vid_generator_->SetBloom(ui_->bloom_checkbox->isChecked());
+    vid_generator_->SetOutputFilePath("movie.mp4");
+
+    auto generate_thread = std::thread([&] {
+        vid_generator_->GenerateAndSave();
+        finished = true;
+    });
+
+    scene_->setSceneRect(0, 0, img_->size().width, img_->size().height);
+    while (!finished)
+    {
+        std::this_thread::sleep_for(0.1s);
+        pixmap_item_->setPixmap(
+            QPixmap::fromImage(QImage(img_->data, img_->size().width, img_->size().height, format).rgbSwapped()));
+        ui_->graphicsView->update();
+        scene_->update();
+        ui_->graphicsView->fitInView(pixmap_item_, Qt::KeepAspectRatio);
+
+        qApp->processEvents();
+    }
+    generate_thread.join();
+
+    pixmap_item_->setPixmap(
+        QPixmap::fromImage(QImage(img_->data, img_->size().width, img_->size().height, format).rgbSwapped()));
+}
+
+
+void MainWindow::RenderOrAbort()
+{
+
+    ui_->render_button->setText("Abort");
+    if (rendering_)
+    {
+        Abort();
+        ui_->render_button->setText("Render");
+        return;
+    }
+
+    mode_ = ui_->image_mode_button->isChecked() ? kImageMode : kVideoMode;
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    switch (mode_)
+    {
+    case kImageMode:
+        rendering_ = true;
+        RenderImage();
+        break;
+    case kVideoMode:
+        rendering_ = true;
+        RenderVideo();
+        break;
+    default:
+        throw std::runtime_error("unknown mode");
+        break;
+    }
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
     statusBar()->showMessage("Render Time: " + QString::number(duration) + " seconds");
     ui_->render_button->setText("Render");
+    rendering_ = false;
 }
 
 

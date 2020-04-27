@@ -1,6 +1,6 @@
 set(TEST_TARGET ${PROJECT_NAME}_test)
 
-add_executable(${TEST_TARGET} "test.cpp" "image_test.cpp")
+add_executable(${TEST_TARGET} "test.cpp"  "video_generator_test.cpp" "../src/video_generator.cpp")
 target_include_directories(${TEST_TARGET} PRIVATE ${SOURCE_DIR})
 target_precompile_headers(${TEST_TARGET} PRIVATE ${SOURCE_DIR}/pch.h)
 

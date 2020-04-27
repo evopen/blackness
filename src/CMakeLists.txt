@@ -7,7 +7,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
-add_executable (blackness 
+add_executable (blackness
     "blackness.cpp" 
     "movie_writer.cpp" 
     "metric/schwarzschild.cpp" 
@@ -16,6 +16,7 @@ add_executable (blackness
     "image_generator.cpp" 
     "gui/main_window.cpp"
     "gui/main_window.ui"
+    "video_generator.cpp"
 )
 
 if(WIN32)

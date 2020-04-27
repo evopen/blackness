@@ -4,6 +4,8 @@
 #include "metric/flat.h"
 #include "metric/schwarzschild.h"
 
+
+
 void ImageGenerator::Generate()
 {
     abort_     = false;
@@ -117,7 +119,7 @@ void ImageGenerator::Bloom()
     cv::GaussianBlur(*light_buffer_, bloom_buffer, cv::Size(7, 7), 0);
     cv::add(*color_buffer_, bloom_buffer, *hdr_buffer_, cv::noArray(), CV_32FC3);
 
-    auto tonemap = cv::createTonemapReinhard(2.2f);
+    auto tonemap = cv::createTonemapReinhard(1.f);
     cv::Mat ldr;
 
     tonemap->process(*hdr_buffer_, ldr);

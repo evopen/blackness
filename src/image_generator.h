@@ -94,8 +94,11 @@ public:
     void Generate();
     void SaveImageToDisk(std::filesystem::path filename);
     void Abort();
-    bool IsRendering() { return rendering_; }
+    bool IsRendering() const { return rendering_; }
     void Bloom();
+    inline uint32_t Width() const { return width_; }
+    inline uint32_t Height() const { return height_; }
+    inline std::shared_ptr<Camera> GetCamera() { return camera_; }
 
     std::shared_ptr<const cv::Mat> ColorBuffer() { return color_buffer_; }
     std::shared_ptr<const cv::Mat> ResultBuffer() { return result_buffer_; }

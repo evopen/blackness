@@ -1,7 +1,15 @@
 #pragma once
 
 #include "pch.h"
+
 #include "image_generator.h"
+#include "video_generator.h"
+
+enum RenderingMode
+{
+    kImageMode,
+    kVideoMode
+};
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -33,12 +41,18 @@ private:
     void SetupUI();
     void SetupAction();
     void MainWindow::resizeEvent(QResizeEvent* event);
+    void RenderImage();
+    void RenderVideo();
+    void Abort();
 
 private:
     Ui::MainWindow* ui_;
     std::shared_ptr<const cv::Mat> img_;
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* pixmap_item_;
-    std::unique_ptr<ImageGenerator> img_generator_;
+    std::shared_ptr<ImageGenerator> img_generator_;
+    std::shared_ptr<VideoGenerator> vid_generator_;
     bool skybox_need_load_ = true;
+    bool rendering_ = false;
+    RenderingMode mode_;
 };

@@ -5,6 +5,11 @@
 class Camera
 {
 public:
+    explicit Camera()
+    {
+        fov_      = glm::radians(60.f);
+        world_up_ = glm::dvec3(0, 1, 0);
+    }
     explicit Camera(glm::dvec3 position, glm::dvec3 look_at, glm::dvec3 world_up = glm::dvec3(0, 1, 0), double fov = 60)
         : position_(position), world_up_(world_up)
     {
@@ -25,6 +30,13 @@ public:
     {
         front_ = glm::normalize(point - position_);
         UpdateVectors();
+    }
+
+    void SetFrontAndUp(glm::dvec3 front, glm::dvec3 up)
+    {
+        front_ = glm::normalize(front);
+        up_    = glm::normalize(up);
+        right_ = glm::normalize(glm::cross(front_, up_));
     }
 
     glm::dvec3 GetTexCoord(int row, int col, int width, int height)
