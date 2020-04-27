@@ -48,22 +48,22 @@ target_link_libraries(blackness PRIVATE Qt5::Widgets)
 find_package(OpenCV CONFIG REQUIRED)
 target_link_libraries(blackness PRIVATE ${OpenCV_LIBS})
 
-find_library(AVDEVICE_LIBRARY avdevice)
-find_library(AVFILTER_LIBRARY avfilter)
+#find_library(AVDEVICE_LIBRARY avdevice)
+#find_library(AVFILTER_LIBRARY avfilter)
 find_library(SWSCALE_LIBRARY swscale)
 find_library(AVFORMAT_LIBRARY avformat)
 find_library(AVCODEC_LIBRARY avcodec)
-find_library(SWRESAMPLE_LIBRARY swresample)
-find_library(AVRESAMPLE_LIBRARY avresample)
+#find_library(SWRESAMPLE_LIBRARY swresample)
+#find_library(AVRESAMPLE_LIBRARY avresample)
 find_library(AVUTIL_LIBRARY avutil)
 target_link_libraries(blackness PRIVATE
-    ${AVDEVICE_LIBRARY} 
-    ${AVFILTER_LIBRARY}
+#    ${AVDEVICE_LIBRARY} 
+#    ${AVFILTER_LIBRARY}
     ${SWSCALE_LIBRARY} 
     ${AVFORMAT_LIBRARY} 
     ${AVCODEC_LIBRARY} 
-    ${SWRESAMPLE_LIBRARY}
-    ${AVRESAMPLE_LIBRARY} 
+#    ${SWRESAMPLE_LIBRARY}
+#    ${AVRESAMPLE_LIBRARY} 
     ${AVUTIL_LIBRARY}
 )
 
