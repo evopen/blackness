@@ -137,9 +137,9 @@ void MovieWriter::AddFrame(const uint8_t* pixels)
         for (unsigned int x = 0; x < kWidth; x++)
         {
             // rgbpic->linesize[0] is equal to width.
-            rgbpic_->data[0][y * rgbpic_->linesize[0] + 3 * x + 0] = pixels[y * channels * kWidth + channels * x + 0];
+            rgbpic_->data[0][y * rgbpic_->linesize[0] + 3 * x + 0] = pixels[y * channels * kWidth + channels * x + 2];
             rgbpic_->data[0][y * rgbpic_->linesize[0] + 3 * x + 1] = pixels[y * channels * kWidth + channels * x + 1];
-            rgbpic_->data[0][y * rgbpic_->linesize[0] + 3 * x + 2] = pixels[y * channels * kWidth + channels * x + 2];
+            rgbpic_->data[0][y * rgbpic_->linesize[0] + 3 * x + 2] = pixels[y * channels * kWidth + channels * x + 0];
         }
     }
 
