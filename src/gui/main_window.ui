@@ -191,7 +191,7 @@
                  <item>
                   <widget class="QLineEdit" name="disk_browser_lineedit">
                    <property name="text">
-                    <string>resources\disk\disk.png</string>
+                    <string>resources\disk\flag.png</string>
                    </property>
                   </widget>
                  </item>

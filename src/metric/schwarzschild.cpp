@@ -78,11 +78,14 @@ namespace metric::schwarzschild
             if (pos[1] * last_pos[1] < 0)
                 break;
         }
-        double dr = glm::length(pos_near_disk) - bh.DiskInner();
+        double theta           = std::atan2(pos_near_disk.x, pos_near_disk.z);
+        double sampler_x_ratio = (theta + M_PI) / (M_PI * 2);
+        double dr              = glm::length(pos_near_disk) - bh.DiskInner();
 
-        int sample_index = dr / (bh.DiskOuter() - bh.DiskInner()) * (bh.DiskTexture().size().height - 1);
+        int sample_y_index = dr / (bh.DiskOuter() - bh.DiskInner()) * (bh.DiskTexture().size().height - 1);
+        int sample_x_index = sampler_x_ratio * (bh.DiskTexture().size().width - 1);
 
-        return bh.DiskTexture().at<cv::Vec3b>(sample_index);
+        return bh.DiskTexture().at<cv::Vec3b>(sample_y_index, sample_x_index);
     }
 
     cv::Vec3b Trace(glm::dvec3 position, glm::dvec3 direction, const Blackhole& bh, const Skybox& skybox,
