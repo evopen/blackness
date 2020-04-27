@@ -38,24 +38,32 @@ public:
         if (file_count == 6)
         {
             auto iter = std::filesystem::directory_iterator(skybox_folder);
+            std::vector<std::thread> pool;
+
             for (const auto& file : iter)
             {
                 std::string filename = file.path().stem().string();
-
+                std::function<void()> load;
                 if (filename.find("front") != std::string::npos)
-                    skybox_.front.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.front.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else if (filename.find("back") != std::string::npos)
-                    skybox_.back.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.back.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else if (filename.find("top") != std::string::npos)
-                    skybox_.top.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.top.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else if (filename.find("bottom") != std::string::npos)
-                    skybox_.bottom.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.bottom.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else if (filename.find("left") != std::string::npos)
-                    skybox_.left.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.left.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else if (filename.find("right") != std::string::npos)
-                    skybox_.right.reset(new cv::Mat(cv::imread(file.path().string())));
+                    load = [&] { skybox_.right.reset(new cv::Mat(cv::imread(file.path().string()))); };
                 else
                     throw std::runtime_error("error loading image");
+
+                pool.emplace_back(std::thread(load));
+            }
+            for (auto& thread : pool)
+            {
+                thread.join();
             }
         }
         else if (file_count == 1)
