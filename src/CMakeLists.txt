@@ -1,4 +1,4 @@
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+﻿find_package(Qt5 COMPONENTS Widgets REQUIRED)
 qt5_wrap_ui(SOURCES "gui/main_window.ui")
 
 set(CMAKE_AUTOMOC ON)
@@ -66,3 +66,13 @@ target_link_libraries(blackness PRIVATE
     ${AVRESAMPLE_LIBRARY} 
     ${AVUTIL_LIBRARY}
 )
+
+
+install(TARGETS blackness RUNTIME DESTINATION ".")
+
+file(GLOB DLL_FILES ${CMAKE_BINARY_DIR}/src/*.dll)
+install(FILES ${DLL_FILES} DESTINATION ".")
+install(FILES "${CMAKE_BINARY_DIR}/src/qt.conf" DESTINATION ".")
+install(DIRECTORY "${CMAKE_BINARY_DIR}/src/plugins" DESTINATION ".")
+
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources" DESTINATION ".")
