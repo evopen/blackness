@@ -22,9 +22,11 @@ private slots:
     void SelectSkyboxFolder();
     void SelectDiskTexture();
     void BlackholeCheckboxUpdate();
+    void BloomCheckboxUpdate();
     void AccretionDiskCheckboxUpdate();
     void RenderOrAbort();
     void WidthUpdate();
+    void SkyboxPathUpdate();
 
 private:
     void SetupUI();
@@ -37,4 +39,5 @@ private:
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* pixmap_item_;
     std::unique_ptr<ImageGenerator> img_generator_;
+    bool skybox_need_load_ = true;
 };

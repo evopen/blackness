@@ -28,6 +28,25 @@ void MainWindow::BlackholeCheckboxUpdate()
         ui_->disk_browser_button->setEnabled(true);
     }
 }
+
+void MainWindow::BloomCheckboxUpdate()
+{
+    if (img_generator_->IsRendering())
+        return;
+
+    if (ui_->bloom_checkbox->isChecked())
+    {
+        img_generator_->Bloom();
+        img_ = img_generator_->ResultBuffer();
+    }
+    else
+    {
+        img_ = img_generator_->ColorBuffer();
+    }
+    pixmap_item_->setPixmap(QPixmap::fromImage(
+        QImage(img_->data, img_->size().width, img_->size().height, QImage::Format_RGB888).rgbSwapped()));
+}
+
 void MainWindow::AccretionDiskCheckboxUpdate()
 {
     if (!ui_->accretion_disk_checkbox->isChecked())
@@ -50,6 +69,7 @@ void MainWindow::SelectSkyboxFolder()
     if (!directory.isEmpty())
     {
         ui_->skybox_path_lineedit->setText(directory);
+        skybox_need_load_ = true;
     }
 }
 
@@ -85,11 +105,15 @@ void MainWindow::RenderOrAbort()
         ui_->cam_lookat_y_lineedit->text().toDouble(), ui_->cam_lookat_z_lineedit->text().toDouble());
     Camera camera(camera_pos, camera_lookat);
 
-    img_generator_->LoadSkybox(skybox_folder_path);
+    if (skybox_need_load_)
+    {
+        img_generator_->LoadSkybox(skybox_folder_path);
+        skybox_need_load_ = false;
+    }
     img_generator_->SetCamera(camera);
     img_generator_->SetSamples(samples);
     img_generator_->SetSize(width, height);
-    img_ = img_generator_->ResultImage();
+    img_ = img_generator_->ColorBuffer();
 
 
     std::shared_ptr<Blackhole> blackhole;
@@ -193,6 +217,11 @@ void MainWindow::WidthUpdate()
     }
 }
 
+void MainWindow::SkyboxPathUpdate()
+{
+    skybox_need_load_ = true;
+}
+
 void MainWindow::SetupAction()
 {
     connect(ui_->skybox_browser_button, SIGNAL(clicked()), SLOT(SelectSkyboxFolder()));
@@ -201,4 +230,6 @@ void MainWindow::SetupAction()
     connect(ui_->blackhole_checkbox, SIGNAL(stateChanged(int)), SLOT(BlackholeCheckboxUpdate()));
     connect(ui_->accretion_disk_checkbox, SIGNAL(stateChanged(int)), SLOT(AccretionDiskCheckboxUpdate()));
     connect(ui_->width_lineedit, SIGNAL(editingFinished()), SLOT(WidthUpdate()));
+    connect(ui_->bloom_checkbox, SIGNAL(stateChanged(int)), SLOT(BloomCheckboxUpdate()));
+    connect(ui_->skybox_path_lineedit, SIGNAL(editingFinished()), SLOT(SkyboxPathUpdate()));
 }

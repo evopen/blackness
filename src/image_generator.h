@@ -78,13 +78,19 @@ public:
         this->width_  = width;
         this->height_ = height;
         color_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
+        light_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
+        *light_buffer_ = 0;
+        hdr_buffer_.reset(new cv::Mat(height_, width_, CV_32FC3));
+        result_buffer_.reset(new cv::Mat(height_, width_, CV_8UC3));
     }
     void Generate();
     void SaveImageToDisk(std::filesystem::path filename);
     void Abort();
     bool IsRendering() { return rendering_; }
+    void Bloom();
 
-    std::shared_ptr<const cv::Mat> ResultImage() { return color_buffer_; }
+    std::shared_ptr<const cv::Mat> ColorBuffer() { return color_buffer_; }
+    std::shared_ptr<const cv::Mat> ResultBuffer() { return result_buffer_; }
 
 private:
     std::shared_ptr<Blackhole> blackhole_;
@@ -99,9 +105,12 @@ private:
     std::mt19937 rng_;
     std::shared_ptr<cv::Mat> color_buffer_;
     std::shared_ptr<cv::Mat> light_buffer_;
+    std::shared_ptr<cv::Mat> hdr_buffer_;
+    std::shared_ptr<cv::Mat> result_buffer_;
     bool rendering_ = false;
     bool abort_     = false;
     std::vector<std::thread> thread_pool_;
+    bool color_buffer_refreshed_ = true;
 
     void FlatWorker(int idx);
     void SchwarzschildWorker(int idx);

@@ -28,6 +28,7 @@ void ImageGenerator::Generate()
     }
     thread_pool_.clear();
     rendering_ = false;
+    color_buffer_refreshed_ = true;
 }
 
 void ImageGenerator::Abort()
@@ -61,10 +62,14 @@ void ImageGenerator::SchwarzschildWorker(int idx)
                     sample_coord = tex_coord + glm::dvec3(uni(rng_), uni(rng_), uni(rng_));
                 else
                     sample_coord = tex_coord;
-                color += metric::schwarzschild::Trace(
-                    camera_->Position(), sample_coord, *blackhole_, skybox_, workspace, &hit) / double(samples_);
+                color += (cv::Vec3f) metric::schwarzschild::Trace(
+                             camera_->Position(), sample_coord, *blackhole_, skybox_, workspace, &hit)
+                         / float(samples_);
             }
             color_buffer_->at<cv::Vec3b>(row, col) = color;
+
+            if (hit)
+                light_buffer_->at<cv::Vec3b>(row, col) = color;
         }
     }
 }
@@ -91,7 +96,7 @@ void ImageGenerator::FlatWorker(int idx)
                     sample_coord = tex_coord + glm::dvec3(uni(rng_), uni(rng_), uni(rng_));
                 else
                     sample_coord = tex_coord;
-                color += metric::flat::Trace(camera_->Position(), sample_coord, skybox_) / double(samples_);
+                color += (cv::Vec3f) metric::flat::Trace(camera_->Position(), sample_coord, skybox_) / float(samples_);
             }
             color_buffer_->at<cv::Vec3b>(row, col) = color;
         }
@@ -101,4 +106,23 @@ void ImageGenerator::FlatWorker(int idx)
 void ImageGenerator::SaveImageToDisk(std::filesystem::path filename)
 {
     cv::imwrite(filename.string(), *color_buffer_);
+}
+
+
+void ImageGenerator::Bloom()
+{
+    if (!color_buffer_refreshed_)
+        return;
+    cv::Mat bloom_buffer = cv::Mat::zeros(width_, height_, CV_8UC3);
+    cv::GaussianBlur(*light_buffer_, bloom_buffer, cv::Size(7, 7), 0);
+    cv::add(*color_buffer_, bloom_buffer, *hdr_buffer_, cv::noArray(), CV_32FC3);
+
+    auto tonemap = cv::createTonemapReinhard(2.2f);
+    cv::Mat ldr;
+
+    tonemap->process(*hdr_buffer_, ldr);
+    ldr *= 255;
+    result_buffer_.reset(new cv::Mat(width_, height_, CV_8UC3));
+    ldr.convertTo(*result_buffer_, CV_8UC3);
+    color_buffer_refreshed_ = false;
 }
