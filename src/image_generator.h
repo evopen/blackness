@@ -50,9 +50,9 @@ public:
                     skybox_.top.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename.find("bottom") != std::string::npos)
                     skybox_.bottom.reset(new cv::Mat(cv::imread(file.path().string())));
-                else if (filename.find("left") != std::string::npos)
-                    skybox_.left.reset(new cv::Mat(cv::imread(file.path().string())));
                 else if (filename.find("right") != std::string::npos)
+                    skybox_.left.reset(new cv::Mat(cv::imread(file.path().string())));
+                else if (filename.find("left") != std::string::npos)
                     skybox_.right.reset(new cv::Mat(cv::imread(file.path().string())));
                 else
                     throw std::runtime_error("error loading image");
@@ -62,6 +62,7 @@ public:
             cv::rotate(*skybox_.right, *skybox_.right, cv::ROTATE_90_CLOCKWISE);
             cv::rotate(*skybox_.left, *skybox_.left, cv::ROTATE_90_COUNTERCLOCKWISE);
             cv::flip(*skybox_.top, *skybox_.top, 1);
+            cv::flip(*skybox_.left, *skybox_.left, 0);
         }
         else if (file_count == 1)
         {
