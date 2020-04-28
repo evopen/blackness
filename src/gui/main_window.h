@@ -36,6 +36,7 @@ private slots:
     void WidthUpdate();
     void SkyboxPathUpdate();
     void SaveToDisk();
+    void SelectPositionFile();
 
 private:
     void SetupUI();

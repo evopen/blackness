@@ -66,7 +66,8 @@ void MainWindow::AccretionDiskCheckboxUpdate()
 }
 void MainWindow::SelectSkyboxFolder()
 {
-    QString directory = QFileDialog::getExistingDirectory(this, tr("Select Skybox Folder"), QDir::currentPath());
+    QString directory =
+        QFileDialog::getExistingDirectory(this, tr("Select Skybox Folder"), QDir::currentPath() + "resources/skybox");
 
     if (!directory.isEmpty())
     {
@@ -78,7 +79,8 @@ void MainWindow::SelectSkyboxFolder()
 
 void MainWindow::SelectDiskTexture()
 {
-    QString directory = QFileDialog::getOpenFileName(this, tr("Select Disk Texture"), QDir::currentPath());
+    QString directory =
+        QFileDialog::getOpenFileName(this, tr("Select Disk Texture"), QDir::currentPath() + "resources/disk");
 
     if (!directory.isEmpty())
     {
@@ -221,7 +223,7 @@ void MainWindow::RenderVideo()
     std::filesystem::path position_file_path(ui_->pos_browser_lineedit->text().toStdString());
     vid_generator_->LoadPositions(position_file_path);
     vid_generator_->SetBloom(ui_->bloom_checkbox->isChecked());
-    vid_generator_->SetOutputFilePath("movie.mp4");
+    vid_generator_->SetOutputFilePath("video.mp4");
 
     auto generate_thread = std::thread([&] {
         vid_generator_->GenerateAndSave();
@@ -348,10 +350,22 @@ void MainWindow::SaveToDisk()
     }
 }
 
+void MainWindow::SelectPositionFile()
+{
+    QString directory =
+        QFileDialog::getOpenFileName(this, tr("Select Position file"), QDir::currentPath() + "resources/position");
+
+    if (!directory.isEmpty())
+    {
+        ui_->pos_browser_lineedit->setText(directory);
+    }
+}
+
 void MainWindow::SetupAction()
 {
     connect(ui_->skybox_browser_button, SIGNAL(clicked()), SLOT(SelectSkyboxFolder()));
     connect(ui_->disk_browser_button, SIGNAL(clicked()), SLOT(SelectDiskTexture()));
+    connect(ui_->pos_browser_button, SIGNAL(clicked()), SLOT(SelectPositionFile()));
     connect(ui_->render_button, SIGNAL(clicked()), SLOT(RenderOrAbort()));
     connect(ui_->blackhole_checkbox, SIGNAL(stateChanged(int)), SLOT(BlackholeCheckboxUpdate()));
     connect(ui_->accretion_disk_checkbox, SIGNAL(stateChanged(int)), SLOT(AccretionDiskCheckboxUpdate()));
