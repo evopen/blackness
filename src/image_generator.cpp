@@ -116,7 +116,7 @@ void ImageGenerator::Bloom()
     if (!color_buffer_refreshed_)
         return;
     cv::Mat bloom_buffer = cv::Mat::zeros(width_, height_, CV_8UC3);
-    cv::GaussianBlur(*light_buffer_, bloom_buffer, cv::Size(7, 7), 0);
+    cv::GaussianBlur(*light_buffer_, bloom_buffer, cv::Size(15, 15), 0);
     cv::add(*color_buffer_, bloom_buffer, *hdr_buffer_, cv::noArray(), CV_32FC3);
 
     auto tonemap = cv::createTonemapReinhard(1.f);
