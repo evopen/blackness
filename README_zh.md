@@ -2,6 +2,12 @@
 
 这是一个史瓦西度规下的光线追踪程序，主要是为了史瓦西黑洞可视化
 
+![No Accretion Disk](images/blackhole.png)
+
+![With Disk](images/disk.png)
+
+![Chessboard background](images/motion.gif)
+
 ## 天体物理模拟
 
 我的数学不好，物理也不好。我就是觉得天体物理很有意思，就写了这个黑洞外部的光线追踪程序。
