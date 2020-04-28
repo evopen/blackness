@@ -8,6 +8,10 @@
 
 ![Chessboard background](images/motion.gif)
 
+## 下载
+[码云]
+[github]
+
 ## 天体物理模拟
 
 我的数学不好，物理也不好。我就是觉得天体物理很有意思，就写了这个黑洞外部的光线追踪程序。
@@ -44,3 +48,6 @@ position file的格式如下：
 - 每一行有三个坐标：相机坐标，相机前方方向向量，相机上方向量
 
 视频的输出位置暂时是硬编码的，会在渲染完成之后保存MP4在程序目录下。
+
+[github]:https://github.com/evopen/blackness/releases
+[码云]:https://gitee.com/evopen/blackness/releases

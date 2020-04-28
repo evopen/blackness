@@ -27,7 +27,7 @@ endif()
 add_subdirectory ("playground")
 
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "2")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 
 # Packaging support
