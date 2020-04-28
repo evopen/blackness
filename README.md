@@ -6,8 +6,6 @@ It's essentially a raytracer for schwarzschild space~~time~~.
 
 ![No Accretion Disk](images/blackhole.png)
 
-![With Disk](images/disk.png)
-
 ![Chessboard background](images/motion.gif)
 
 ## Astrophysics Simulation
@@ -23,6 +21,8 @@ I tried to use GPU to accelerate the render. But it turns out slower. Probably b
 download prebuilt binary from [releases].
 
 This is a GUI program, and has a commandline interface(incomplete, mainly focus on gui). 
+
+![Interface](images/interface.png)
 
 Here are some parameters on the right panel of the program.
 

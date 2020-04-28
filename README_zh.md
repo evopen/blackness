@@ -4,8 +4,6 @@
 
 ![No Accretion Disk](images/blackhole.png)
 
-![With Disk](images/disk.png)
-
 ![Chessboard background](images/motion.gif)
 
 ## 下载
@@ -26,6 +24,8 @@
 ## Usage
 
 程序有图形界面也有命令行接口（不完整）
+
+![Interface](images/interface.png)
 
 图形界面的右侧参数如下，
 
