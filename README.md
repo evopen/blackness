@@ -15,6 +15,10 @@ I'm not good at math, and certainly not at physics. I just admire the beauty of 
 
 I hope I got the equation right. It's simply a null geodesic of schwarzschild(non-rotating, non-charged) blackhole. And numerical integrate it to get the path of a light ray.
 
+Notes and prototype are in the other [repo].
+
+I tried to use GPU to accelerate the render. But it turns out slower. Probably because GPU's low freq and slow when deal with float64.
+
 ## Usage
 download prebuilt binary from [releases].
 
@@ -63,3 +67,4 @@ Thanks for apc-llc's [code for encoding] video.
 [code for encoding]:https://github.com/apc-llc/moviemaker-cpp
 [eigenchris]:https://www.youtube.com/user/eigenchris/videos
 [releases]:https://github.com/evopen/blackness/releases
+[repo]:https://github.com/evopen/gr

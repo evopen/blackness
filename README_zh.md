@@ -10,6 +10,7 @@
 
 ## 下载
 [码云]
+
 [github]
 
 ## 天体物理模拟
@@ -17,6 +18,10 @@
 我的数学不好，物理也不好。我就是觉得天体物理很有意思，就写了这个黑洞外部的光线追踪程序。
 
 程序的原理很简单，就是对史瓦西黑洞（不旋转，不带电荷）的Null测地线进行数值积分，就可以得到光线的路径。
+
+笔记和prototype在另一个[仓库]里。
+
+我尝试用GPU加速了，但是更慢了。可能是因为GPU频率太低，双精度浮点的速度也很低。
 
 ## Usage
 
@@ -51,3 +56,4 @@ position file的格式如下：
 
 [github]:https://github.com/evopen/blackness/releases
 [码云]:https://gitee.com/evopen/blackness/releases
+[仓库]:https://github.com/evopen/gr
