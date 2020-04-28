@@ -49,6 +49,9 @@ see [resources/position/circular.txt] for example
 
 Video generating output path is currently hard-coded. It will save automatically in the program directory with extension "mp4".
 
+## Build
+I use vcpkg for thrid party library management, follow the cmake file for the dependencies.
+
 ## Credit
 Thanks for [eigenchris] for amazing tensor calculus courses. 
 
