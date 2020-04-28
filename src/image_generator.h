@@ -57,6 +57,11 @@ public:
                 else
                     throw std::runtime_error("error loading image");
             }
+            cv::flip(*skybox_.front, *skybox_.front, 1);
+            cv::rotate(*skybox_.back, *skybox_.back, cv::ROTATE_180);
+            cv::rotate(*skybox_.right, *skybox_.right, cv::ROTATE_90_CLOCKWISE);
+            cv::rotate(*skybox_.left, *skybox_.left, cv::ROTATE_90_COUNTERCLOCKWISE);
+            cv::flip(*skybox_.top, *skybox_.top, 1);
         }
         else if (file_count == 1)
         {

@@ -49,5 +49,5 @@ cv::Vec3b metric::common::SkyboxSampler(const glm::dvec3& tex_coord, const Skybo
 
     int row = std::lround(coord_2d[1] * max_row_col);
     int col = std::lround(coord_2d[0] * max_row_col);
-    return image->at<cv::Vec3b>(col, row);
+    return image->at<cv::Vec3b>(row, col);
 }
