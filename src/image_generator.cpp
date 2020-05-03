@@ -5,7 +5,6 @@
 #include "metric/schwarzschild.h"
 
 
-
 void ImageGenerator::Generate()
 {
     abort_     = false;
@@ -29,7 +28,7 @@ void ImageGenerator::Generate()
         thread_pool_[i].join();
     }
     thread_pool_.clear();
-    rendering_ = false;
+    rendering_              = false;
     color_buffer_refreshed_ = true;
 }
 
@@ -43,7 +42,9 @@ void ImageGenerator::Abort()
 
 void ImageGenerator::SchwarzschildWorker(int idx)
 {
-    std::uniform_real_distribution<double> uni(-0.001, 0.001);
+    int img_size_pow  = std::log2(width_);
+    double sample_gap = std::pow(0.5, img_size_pow);
+    std::uniform_real_distribution<double> uni(-sample_gap, sample_gap);
     gsl_integration_workspace* workspace = gsl_integration_workspace_alloc(1000);
     for (int row = idx; row < height_; row += threads_)
     {
@@ -111,18 +112,36 @@ void ImageGenerator::SaveImageToDisk(std::filesystem::path filename)
 }
 
 
+inline cv::Vec3f ToneMapping(cv::Vec3f hdr_color)
+{
+    double exposure = 1.0;
+    cv::exp(-hdr_color * exposure, hdr_color);
+    hdr_color = cv::Vec3f(1.0, 1.0, 1.0) - hdr_color;
+    cv::pow(hdr_color, 1.0 / 2.2, hdr_color);
+    return hdr_color;
+}
+
 void ImageGenerator::Bloom()
 {
     if (!color_buffer_refreshed_)
         return;
+    int img_size_pow = std::log2(width_);
+    cv::Size blur_size(std::pow(2, img_size_pow - 4) - 1, std::pow(2, img_size_pow - 4) - 1);
     cv::Mat bloom_buffer = cv::Mat::zeros(width_, height_, CV_8UC3);
-    cv::GaussianBlur(*light_buffer_, bloom_buffer, cv::Size(15, 15), 0);
+    cv::GaussianBlur(*light_buffer_, bloom_buffer, blur_size, 0);
     cv::add(*color_buffer_, bloom_buffer, *hdr_buffer_, cv::noArray(), CV_32FC3);
-
+    *hdr_buffer_ = *hdr_buffer_ / 255.0;
     auto tonemap = cv::createTonemapReinhard(1.f);
-    cv::Mat ldr;
+    cv::Mat ldr(width_, height_, CV_32FC3);
 
-    tonemap->process(*hdr_buffer_, ldr);
+    for (int row = 0; row < height_; ++row)
+    {
+        for (int col = 0; col < width_; ++col)
+        {
+            ldr.at<cv::Vec3f>(col, row) = ToneMapping(hdr_buffer_->at<cv::Vec3f>(col, row));
+        }
+    }
+    cv::patchNaNs(ldr);
     ldr *= 255;
     result_buffer_.reset(new cv::Mat(width_, height_, CV_8UC3));
     ldr.convertTo(*result_buffer_, CV_8UC3);
