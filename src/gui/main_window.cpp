@@ -297,8 +297,8 @@ void MainWindow::SetupUI()
     ui_->cam_lookat_x_lineedit->setValidator(pos_validator);
     ui_->cam_lookat_y_lineedit->setValidator(pos_validator);
     ui_->cam_lookat_z_lineedit->setValidator(pos_validator);
-    ui_->width_lineedit->setValidator(new QIntValidator(1, 4096, this));
-    ui_->height_lineedit->setValidator(new QIntValidator(1, 4096, this));
+    ui_->width_lineedit->setValidator(new QIntValidator(1, 16384, this));
+    ui_->height_lineedit->setValidator(new QIntValidator(1, 16384, this));
     scene_       = new QGraphicsScene();
     pixmap_item_ = new QGraphicsPixmapItem();
     scene_->addItem(pixmap_item_);
