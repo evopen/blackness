@@ -22,7 +22,7 @@ download prebuilt binary from [releases].
 
 This is a GUI program, and has a commandline interface(incomplete, mainly focus on gui). 
 
-![Interface](images/interface.png)
+![Interface](images/interface.jpg)
 
 Here are some parameters on the right panel of the program.
 

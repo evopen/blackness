@@ -25,7 +25,7 @@
 
 程序有图形界面也有命令行接口（不完整）
 
-![Interface](images/interface.png)
+![Interface](images/interface.jpg)
 
 图形界面的右侧参数如下，
 
